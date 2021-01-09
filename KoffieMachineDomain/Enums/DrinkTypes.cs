@@ -2,9 +2,9 @@
 {
     public enum DrinkTypes
     {
-        NORMAL,
-        SUGAR,
-        MILK,
-        SUGARMILK
+        Normal,
+        Sugar,
+        Milk,
+        SugarMilk
     }
 }
