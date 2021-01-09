@@ -20,11 +20,6 @@ namespace KoffieMachineDomain
             BasePrice = 1.50;
         }
 
-        public override double GetPrice()
-        {
-            return BasePrice;
-        }
-
         public override ICollection<string> LogDrinkMaking(ICollection<string> log)
         {
             var buildsteps = _hotChocolate.GetBuildSteps();

@@ -20,11 +20,6 @@ namespace KoffieMachineDomain
             BasePrice = 5;
         }
 
-        public override double GetPrice()
-        {
-            return BasePrice;
-        }
-
         public override ICollection<string> LogDrinkMaking(ICollection<string> log)
         {
             // Choc
@@ -33,6 +28,7 @@ namespace KoffieMachineDomain
             {
                 log.Add(s);
             }
+
             // Coffee
             _coffee.LogDrinkMaking(log);
 

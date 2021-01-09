@@ -12,13 +12,12 @@ namespace KoffieMachineDomain.Decorators
         {
             _drink = drink;
             SugarAmount = sugarAmount;
-            BasePrice += 0.10;
             Name = _drink.Name;
         }
 
         public override double GetPrice()
         {
-            return _drink.GetPrice();
+            return _drink.GetPrice() + 0.10;
         }
 
         public override ICollection<string> LogDrinkMaking(ICollection<string> log)
