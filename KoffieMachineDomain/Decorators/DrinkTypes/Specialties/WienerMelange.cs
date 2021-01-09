@@ -17,11 +17,6 @@ namespace KoffieMachineDomain
 
         public Strength DrinkStrength { get; set; }
 
-        public override double GetPrice()
-        {
-            return BasePrice;
-        }
-
         public override ICollection<string> LogDrinkMaking(ICollection<string> log)
         {
             log.Add($"Setting coffee strength to {DrinkStrength}.");

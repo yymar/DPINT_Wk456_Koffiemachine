@@ -14,6 +14,7 @@ namespace KoffieMachineDomain
             DrinkStrength = coffeeStrength;
             BasePrice = 5;
         }
+
         public Strength DrinkStrength { get; set; }
 
         public override ICollection<string> LogDrinkMaking(ICollection<string> log)
