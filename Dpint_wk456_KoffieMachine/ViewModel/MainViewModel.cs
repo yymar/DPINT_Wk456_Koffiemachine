@@ -70,7 +70,7 @@ namespace Dpint_wk456_KoffieMachine.ViewModel
                 else // Pay what you can, fill up with coins later.
                 {
                     _cashOnCards[SelectedPaymentCardUsername] = 0;
-                    
+
                     RemainingPriceToPay -= insertedMoney;
                 }
                 LogText.Add($"Inserted {insertedMoney.ToString("C", CultureInfo.CurrentCulture)}, Remaining: {RemainingPriceToPay.ToString("C", CultureInfo.CurrentCulture)}.");
@@ -89,7 +89,7 @@ namespace Dpint_wk456_KoffieMachine.ViewModel
                 _selectedDrink = null;
             }
         }
-        
+
 
         public double PaymentCardRemainingAmount => _cashOnCards.ContainsKey(SelectedPaymentCardUsername ?? "") ? _cashOnCards[SelectedPaymentCardUsername] : 0;
 
@@ -160,8 +160,8 @@ namespace Dpint_wk456_KoffieMachine.ViewModel
                     LogText.Add($"Could not make {drinkName}, recipe not found.");
                     break;
             }
-            
-            if(_selectedDrink != null)
+
+            if (_selectedDrink != null)
             {
                 RemainingPriceToPay = _selectedDrink.GetPrice();
                 LogText.Add($"Selected {_selectedDrink.Name}, price: {RemainingPriceToPay.ToString("C", CultureInfo.CurrentCulture)}");
@@ -181,7 +181,7 @@ namespace Dpint_wk456_KoffieMachine.ViewModel
                     _selectedDrink = new Coffee() { DrinkStrength = CoffeeStrength, HasSugar = true, SugarAmount = SugarAmount };
                     break;
                 case "Espresso":
-                    _selectedDrink = new Espresso(){ HasSugar = true, SugarAmount = SugarAmount };
+                    _selectedDrink = new Espresso() { HasSugar = true, SugarAmount = SugarAmount };
                     break;
                 case "Capuccino":
                     _selectedDrink = new Capuccino() { HasSugar = true, SugarAmount = SugarAmount };
