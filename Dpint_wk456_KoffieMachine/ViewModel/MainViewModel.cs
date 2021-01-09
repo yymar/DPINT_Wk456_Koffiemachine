@@ -1,12 +1,11 @@
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using KoffieMachineDomain;
-using KoffieMachineDomain.Decorators;
 using KoffieMachineDomain.Enums;
 using KoffieMachineDomain.Factory;
 using KoffieMachineDomain.Interfaces;
+using KoffieMachineDomain.Payments;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows.Input;
@@ -16,12 +15,11 @@ namespace Dpint_wk456_KoffieMachine.ViewModel
 {
     public class MainViewModel : ViewModelBase
     {
-        private Dictionary<string, double> _cashOnCards;
-        public ObservableCollection<string> LogText { get; private set; }
-
         // additions
         private TeaBlendRepository _teaBlendRepository;
         private CultureInfo _currentCulture;
+        private CashPaymentController _cashPaymentController;
+        private CardPaymentController _cardPaymentController;
 
         public MainViewModel()
         {
@@ -35,26 +33,28 @@ namespace Dpint_wk456_KoffieMachine.ViewModel
                 "Done, what would you like to drink?"
             };
 
-            _cashOnCards = new Dictionary<string, double>();
-            _cashOnCards["Arjen"] = 5.0;
-            _cashOnCards["Bert"] = 3.5;
-            _cashOnCards["Chris"] = 7.0;
-            _cashOnCards["Daan"] = 6.0;
+            // intialise payment controllers
+            _cashPaymentController = new CashPaymentController();
+            _cardPaymentController = new CardPaymentController();
 
-            PaymentCardUsernames = new ObservableCollection<string>(_cashOnCards.Keys);
+            // gets Key values from _cashOnCard dictionary in CashPaymentController.cs (cardholder names)
+            PaymentCardUsernames = new ObservableCollection<string>(_cardPaymentController.GetCardNames());
+            // sets selected user to first entry of ObservableCollection PaymentCardUsernames.
             SelectedPaymentCardUsername = PaymentCardUsernames[0];
 
+            // new teablend repository from dependency
             _teaBlendRepository = new TeaBlendRepository();
-          
             TeaBlendNames = new ObservableCollection<string>(_teaBlendRepository.BlendNames);
             SelectedTeaBlend = TeaBlendNames[0];
 
-            // puts euro sign at the front of the numbers instead of behind them.
+            // formats the euro sign to the front instead of the back.
             _currentCulture = new CultureInfo("nl-NL");
             _currentCulture.NumberFormat.CurrencyPositivePattern = 0;
             _currentCulture.NumberFormat.CurrencyNegativePattern = 2;
             _currentCulture.NumberFormat.CurrencyDecimalSeparator = ".";
         }
+
+        public ObservableCollection<string> LogText { get; private set; }
 
         private IDrink _selectedDrink;
         public string SelectedDrinkName
@@ -69,42 +69,35 @@ namespace Dpint_wk456_KoffieMachine.ViewModel
 
         #region Payment
 
+        #region New Payment Code
+
         public RelayCommand PayByCardCommand => new RelayCommand(() =>
         {
-            PayDrink(payWithCard: true);
+            // prevents exception, can't pay if there's no drink selected
+            if (_selectedDrink == null) { return; }
+
+            RemainingPriceToPay = _cardPaymentController.PayDrink(SelectedPaymentCardUsername, RemainingPriceToPay);
+
+            double cardAmountLeft = _cardPaymentController.GetCardAmountLeft(SelectedPaymentCardUsername);
+            LogText.Add($"Card Amount Left {cardAmountLeft.ToString("C", _currentCulture)}, Remaining Price to Pay: {RemainingPriceToPay.ToString("C", _currentCulture)}.");
+            CheckPriceToPay();
+            RaisePropertyChanged(() => PaymentCardRemainingAmount);
         });
 
         public ICommand PayByCoinCommand => new RelayCommand<double>(coinValue =>
         {
-            PayDrink(payWithCard: false, insertedMoney: coinValue);
+            // prevents exception, can't pay if there's no drink selected
+            if (_selectedDrink == null) { return; }
+            RemainingPriceToPay = _cashPaymentController.PayDrink(coinValue, RemainingPriceToPay);
+            LogText.Add($"Inserted {coinValue.ToString("C", _currentCulture)}, Remaining: {RemainingPriceToPay.ToString("C", _currentCulture)}.");
+            CheckPriceToPay();
         });
 
-        private void PayDrink(bool payWithCard, double insertedMoney = 0)
+        public double PaymentCardRemainingAmount => _cardPaymentController.GetCardAmountLeft(SelectedPaymentCardUsername);
+
+        private void CheckPriceToPay()
         {
-            if (_selectedDrink != null && payWithCard)
-            {
-                insertedMoney = _cashOnCards[SelectedPaymentCardUsername];
-                if (RemainingPriceToPay <= insertedMoney)
-                {
-                    _cashOnCards[SelectedPaymentCardUsername] = insertedMoney - RemainingPriceToPay;
-                    RemainingPriceToPay = 0;
-                }
-                else // Pay what you can, fill up with coins later.
-                {
-                    _cashOnCards[SelectedPaymentCardUsername] = 0;
-
-                    RemainingPriceToPay -= insertedMoney;
-                }
-                LogText.Add($"Inserted {insertedMoney.ToString("C", CultureInfo.CurrentCulture)}, Remaining: {RemainingPriceToPay.ToString("C", CultureInfo.CurrentCulture)}.");
-                RaisePropertyChanged(() => PaymentCardRemainingAmount);
-            }
-            else if (_selectedDrink != null && !payWithCard)
-            {
-                RemainingPriceToPay = Math.Max(Math.Round(RemainingPriceToPay - insertedMoney, 2), 0);
-                LogText.Add($"Inserted {insertedMoney.ToString("C", CultureInfo.CurrentCulture)}, Remaining: {RemainingPriceToPay.ToString("C", CultureInfo.CurrentCulture)}.");
-            }
-
-            if (_selectedDrink != null && RemainingPriceToPay == 0)
+            if (RemainingPriceToPay == 0.0)
             {
                 _selectedDrink.LogDrinkMaking(LogText);
                 LogText.Add("------------------");
@@ -112,9 +105,12 @@ namespace Dpint_wk456_KoffieMachine.ViewModel
             }
         }
 
-        public double PaymentCardRemainingAmount => _cashOnCards.ContainsKey(SelectedPaymentCardUsername ?? "") ? _cashOnCards[SelectedPaymentCardUsername] : 0;
+        #endregion New Payment Code
+
+        #region Original Remaining Payment Code
 
         public ObservableCollection<string> PaymentCardUsernames { get; set; }
+
         private string _selectedPaymentCardUsername;
         public string SelectedPaymentCardUsername
         {
@@ -133,6 +129,8 @@ namespace Dpint_wk456_KoffieMachine.ViewModel
             get { return _remainingPriceToPay; }
             set { _remainingPriceToPay = value; RaisePropertyChanged(() => RemainingPriceToPay); }
         }
+        
+        #endregion Original Remaining Payment Code
 
         #endregion Payment
 
@@ -159,20 +157,20 @@ namespace Dpint_wk456_KoffieMachine.ViewModel
             set { _milkAmount = value; RaisePropertyChanged(() => MilkAmount); }
         }
 
-        // added 
+        #region Newly Added Coffee (tea) Buttons Code
+
+        private ObservableCollection<string> _teaBlendNames;
+        public ObservableCollection<string> TeaBlendNames
+        {
+            get => _teaBlendNames;
+            set { _teaBlendNames = value; RaisePropertyChanged(() => TeaBlendNames); }
+        }
+
         private string _selectedTeaBlend;
         public string SelectedTeaBlend
         {
             get { return _selectedTeaBlend; }
             set { _selectedTeaBlend = value; RaisePropertyChanged(() => SelectedTeaBlend); }
-        }
-
-        private ObservableCollection<string> _teaBlendNames;
-
-        public ObservableCollection<string> TeaBlendNames
-        {
-            get => _teaBlendNames;
-            set { _teaBlendNames = value; RaisePropertyChanged(() => TeaBlendNames); }
         }
 
         public ICommand DrinkCommand => new RelayCommand<DrinkInformation>((drinkInformation) =>
@@ -203,23 +201,12 @@ namespace Dpint_wk456_KoffieMachine.ViewModel
                     break;
             }
 
-            if (CheckSelectedDrink(drinkInformation.Name))
-                return;
             RaisePropertyChanged(() => RemainingPriceToPay);
             RaisePropertyChanged(() => SelectedDrinkName);
             RaisePropertyChanged(() => SelectedDrinkPrice);
         });
 
-        //Helper method
-        private bool CheckSelectedDrink(string drinkName)
-        {
-            if (_selectedDrink == null)
-            {
-                LogText.Add($"Could not make {drinkName}, recipe not found.");
-                return true;
-            }
-            return false;
-        }
+        #endregion Newly Added Coffee (tea) Buttons Code
 
         #endregion Coffee buttons
     }

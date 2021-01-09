@@ -43,8 +43,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Decorators\Chocolate\HotChocolateDeluxeWrapper.cs" />
-    <Compile Include="Decorators\Chocolate\HotChocolateWrapper.cs" />
+    <Compile Include="Decorators\DrinkTypes\Chocolate\HotChocolateDeluxeWrapper.cs" />
+    <Compile Include="Decorators\DrinkTypes\Chocolate\HotChocolateWrapper.cs" />
     <Compile Include="Decorators\DrinkTypes\Special Coffees\CoffeeChoc.cs" />
     <Compile Include="Decorators\DrinkTypes\Special Coffees\IrishCoffee.cs" />
     <Compile Include="Decorators\DrinkTypes\Special Coffees\SpanishCoffee.cs" />
@@ -65,6 +65,8 @@
     <Compile Include="Decorators\DrinkTypes\Normal Drinks\Espresso.cs" />
     <Compile Include="Factory\DrinkFactory.cs" />
     <Compile Include="Interfaces\IDrink.cs" />
+    <Compile Include="Payments\CashPaymentController.cs" />
+    <Compile Include="Payments\CardPaymentController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

@@ -186,7 +186,7 @@
                 </Button>
                 <StackPanel>
                     <TextBlock TextAlignment="Center" Margin="7"> Tea Blend</TextBlock>
-                    <ComboBox ItemsSource="{Binding TeaBlendNames}" SelectedValue="{Binding SelectedTeaBlend}" Width="100"  MaxHeight="25"/>
+                    <ComboBox ItemsSource="{Binding TeaBlendNames}" SelectedValue="{Binding SelectedTeaBlend}" Width="100" MaxHeight="25"/>
                 </StackPanel>
             </StackPanel>
             <Separator />

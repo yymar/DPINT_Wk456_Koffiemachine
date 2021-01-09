@@ -11,7 +11,7 @@ namespace KoffieMachineDomain
         {
             Name = "CafeAuLait";
             DrinkStrength = coffeeStrength;
-            BasePrice = 3.5;
+            BasePrice = 3.50;
         }
         public Strength DrinkStrength { get; set; }
 

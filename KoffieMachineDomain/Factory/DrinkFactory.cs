@@ -12,7 +12,7 @@ namespace KoffieMachineDomain.Factory
         public const string ESPRESSO = "Espresso";
         public const string CAPUCCINO = "Capuccino";
         public const string WIENER_MELANGE = "Wiener Melange";
-        public const string CAFE_AU_LAIT = "Cafe au Lait";
+        public const string CAFE_AU_LAIT = "Café au Lait";
         public const string CHOCOLATE = "Chocolate";
         public const string CHOCOLATE_DELUXE = "Chocolate Deluxe";
         public const string TEA = "Tea";
@@ -90,8 +90,6 @@ namespace KoffieMachineDomain.Factory
                 default:
                     return drink;
             }
-
-            return drink;
         }
     }
 }

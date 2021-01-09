@@ -17,7 +17,7 @@ namespace KoffieMachineDomain
             _hotChocolate = choco;
             _hotChocolate.MakeDeluxe();
             Name = choco.GetNameOfDrink();
-            BasePrice = 1.20;
+            BasePrice = 1.50;
         }
 
         public override double GetPrice()
